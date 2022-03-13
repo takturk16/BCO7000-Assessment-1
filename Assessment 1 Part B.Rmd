@@ -114,31 +114,37 @@ fastfood%>%
 #average calories
 
 average_calories<-fastfood%>%
-  group_by(restaurant, calories)%>%
   mutate(average_calories=mean(calories, na.rm=TRUE))%>%
-  ungroup()
-
-average_calories<-fastfood%>%mutate(average_calories=mean(calories, na.rm=TRUE))%>%group_by(restaurant)%>%summarise(average_calories=mean(calories, na.rm=TRUE))%>%ungroup()
-
-#max fat
-
-fastfood%>%
-  group_by(restaurant, total_fat)%>%
-  mutate(total_fat=max(total_fat, na.rm=TRUE))%>%
-  select(restaurant, total_fat)%>%
-   arrange(desc(total_fat))%>%
-  ungroup()
-
-#min cholesterol
-
-fastfood%>%
-  group_by(restaurant, cholesterol)%>%
-  mutate(cholesterol=min(cholesterol, na.rm=TRUE))%>%
-  select(restaurant, cholesterol)%>%
-   arrange(desc(cholesterol))%>%
+  group_by(restaurant)%>%
+  summarise(average_calories=mean(calories, na.rm=TRUE))%>%
   ungroup()
 
 ```
+
+```{r}
+
+#max fat
+
+max_fat<-fastfood%>%
+  mutate(max_fat=max(total_fat, na.rm=TRUE))%>%
+  group_by(restaurant)%>%
+  summarise(max_fat=max(total_fat, na.rm=TRUE))%>%
+  ungroup()
+
+```
+
+```{r}
+
+#min cholesterol
+
+min_cholesterol<-fastfood%>%
+  mutate(min_cholesterol=min(cholesterol, na.rm=TRUE))%>%
+  group_by(restaurant)%>%
+  summarise(min_cholesterol=min(cholesterol, na.rm=TRUE))%>%
+  ungroup()
+
+```
+
 
 15.
 ```{r}
@@ -147,9 +153,27 @@ fastfood%>%ggplot(
   aes(restaurant, total_fat, colour = restaurant)) +
   geom_col()
 
-#I believe this data viz is a simple way to differentiate between the various restaurants on the x axis whilst also able to view on the y axis the total_fat of these restaurants.
+#I believe this data viz is a simple way to differentiate between the various restaurants on the x axis whilst also able to view on the y axis the total_fat of these restaurants. Additionally the impact of colour can help distiguish between the different types of restaurants. 
 
 ```
+
+16. 
+```{r}
+
+fastfood%>%
+  mutate(cholesterol_sodium=cholesterol+sodium)
+
+fastfood%>%
+  select(-salad)
+
+```
+
+
+17. 
+```{r}
+
+```
+
 
 
 
