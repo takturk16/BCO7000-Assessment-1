@@ -172,6 +172,10 @@ fastfood%>%
 17. 
 ```{r}
 
+fastfood%>% 
+  ggplot(aes(sugar, protein)) + 
+  geom_point()
+
 ```
 
 
