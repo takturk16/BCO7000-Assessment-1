@@ -1,5 +1,5 @@
 ---
-title: "Assessment 1"
+title: "Assessment 1 - Part A"
 author: "Tolga Akturk - 3876862"
 date: '2022-03-03'
 output: html_document
@@ -8,21 +8,35 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library
+library(tidyverse)
 ```
+## Part A
 
+2. 
 # RMarkdown editing
 
+3. & 4. 
 ***R Markdown allows you to create documents that serve as a neat record of your analysis. In the world of reproducible research, we want other researchers to easily understand what we did in our analysis, otherwise nobody can be certain that you analysed your data properly. You might choose to create an RMarkdown document as an appendix to a paper or project assignment that you are doing, upload it to an online repository such as Github, or simply to keep as a personal record so you can quickly look back at your code and see what you did. RMarkdown presents your code alongside its output (graphs, tables, etc.) with conventional text to explain it, a bit like a notebook.***
 
+5. 
 [Link](https://rmarkdown.rstudio.com/lesson-8.html)
 
+6. 
 ```{r}
+
 fastfood<-read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-09-04/fastfood_calories.csv")
 
-knitr::kable(head(fastfood[, 1:10]))
+```
+
+7. 
+```{r}
+
+fastfood%>%head(10)
+
+knitr::kable(head(fastfood[1:5, 1:10]))
 
 ```
+
 
 
 
