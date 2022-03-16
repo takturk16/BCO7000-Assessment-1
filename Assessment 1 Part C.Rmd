@@ -1,0 +1,255 @@
+---
+title: "Assessment 1 Part C"
+author: "Tolga Akturk"
+date: '2022-03-16'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part A
+
+2. 
+# RMarkdown editing
+
+3. & 4. 
+***R Markdown allows you to create documents that serve as a neat record of your analysis. In the world of reproducible research, we want other researchers to easily understand what we did in our analysis, otherwise nobody can be certain that you analysed your data properly. You might choose to create an RMarkdown document as an appendix to a paper or project assignment that you are doing, upload it to an online repository such as Github, or simply to keep as a personal record so you can quickly look back at your code and see what you did. RMarkdown presents your code alongside its output (graphs, tables, etc.) with conventional text to explain it, a bit like a notebook.***
+
+5. 
+[Link](https://rmarkdown.rstudio.com/lesson-8.html)
+
+6. 
+```{r}
+fastfood<-read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-09-04/fastfood_calories.csv")
+```
+
+7. 
+```{r}
+
+fastfood%>%head(10)
+
+```
+
+```{r}
+
+knitr::kable(head(fastfood[1:5, 1:10]))
+
+```
+
+
+## Part B
+
+8. 
+```{r}
+
+fastfood%>%filter(calories>1000)
+
+```
+
+9. 
+```{r}
+#arrange fastfood data into dont_eat_this with total_fat >40 and total_carb >80
+
+dont_eat_this<-fastfood%>%
+  filter(
+    total_fat>40 &
+      total_carb>80)%>%
+  arrange(desc(total_fat))
+
+```
+
+10.
+```{r}
+
+heavy_food<-fastfood%>%
+  mutate(
+    heavy_food=case_when(
+      calories>500 ~"heavy",
+      calories<250 ~"low",
+      T ~"average"
+    )
+  )
+
+heavy_food%>%
+  count(heavy_food, sort=TRUE)
+
+```
+
+11.
+```{r}
+
+library(skimr)
+
+skim(fastfood)
+
+```
+
+12.
+```{r}
+
+fastfood%>%
+  count(restaurant, sort = TRUE)%>%
+  arrange(desc(restaurant))
+
+menu<-fastfood%>%
+  distinct(item)
+
+```
+
+13. 
+```{r}
+
+fastfood%>%
+  group_by(restaurant)%>%
+  summarise(calories=mean(calories, na.rm=TRUE))
+
+```
+
+14. 
+```{r}
+
+#average calories
+
+average_calories<-fastfood%>%
+  mutate(average_calories=mean(calories, na.rm=TRUE))%>%
+  group_by(restaurant)%>%
+  summarise(average_calories=mean(calories, na.rm=TRUE))%>%
+  ungroup()
+
+```
+
+```{r}
+
+#max fat
+
+max_fat<-fastfood%>%
+  mutate(max_fat=max(total_fat, na.rm=TRUE))%>%
+  group_by(restaurant)%>%
+  summarise(max_fat=max(total_fat, na.rm=TRUE))%>%
+  ungroup()
+
+```
+
+```{r}
+
+#min cholesterol
+
+min_cholesterol<-fastfood%>%
+  mutate(min_cholesterol=min(cholesterol, na.rm=TRUE))%>%
+  group_by(restaurant)%>%
+  summarise(min_cholesterol=min(cholesterol, na.rm=TRUE))%>%
+  ungroup()
+
+```
+
+
+15.
+```{r}
+
+fastfood%>%ggplot(
+  aes(restaurant, total_fat, colour = restaurant)) +
+  geom_col()
+
+#I believe this data viz is a simple way to differentiate between the various restaurants on the x axis whilst also able to view on the y axis the total_fat of these restaurants. Additionally the impact of colour can help distiguish between the different types of restaurants. 
+
+```
+
+16. 
+```{r}
+
+fastfood%>%
+  mutate(cholesterol_sodium=cholesterol+sodium)
+
+fastfood%>%
+  select(-salad)
+
+```
+
+
+17. 
+```{r}
+
+fastfood%>% 
+  ggplot(aes(sugar, protein)) + 
+  geom_point()
+
+```
+
+##Part C
+
+```{r}
+#Q18 
+
+fastfood<-fastfood%>%
+  mutate(
+    restaurant=as_factor(restaurant),
+    item=as_factor(item),
+    salad=as_factor(salad))
+
+
+```
+
+
+```{r}
+
+#Q19  
+
+calories_type<-fastfood%>%mutate(calories_type=cut_number(calories, n=3), labels = c("low", "med", "high"))%>% arrange(desc(calories))
+
+```
+
+```{r}
+
+#Q20
+fastfood%>%
+ggplot(aes(restaurant, item)) +
+  geom_count() +
+  coord_polar() + 
+  theme_classic() +
+  facet_wrap(~ restaurant)
+ 
+
+fastfood%>% 
+  ggplot(aes(sugar, protein)) + 
+  geom_point()
+```
+
+```{r}
+#Q21
+trans_fat_percent<-fastfood%>%
+mutate(trans_fat_percent=trans_fat/total_fat*100)
+
+```
+
+```{r}
+#Q22
+
+fastfood%>%
+ggplot(aes(restaurant, trans_fat)) +
+  geom_col() +
+  theme_light() +
+  facet_wrap(~ restaurant) +
+  coord_flip()
+```
+
+```{r}
+
+#Q23
+
+fastfood%>%
+  group_by(restaurant)%>%
+  summarise(total_fat_mean=mean(total_fat, na.rm=TRUE))
+```
+
+```{r}
+#Q24
+
+fastfood%>%
+ggplot(aes(restaurant, total_fat, colour = restaurant)) +
+  geom_col() +
+  coord_polar() +
+  theme_classic() 
+
+```
