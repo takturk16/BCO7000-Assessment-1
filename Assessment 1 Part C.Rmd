@@ -177,7 +177,7 @@ fastfood%>%
 
 ```
 
-##Part C
+##Part C Draft
 
 ```{r}
 #Q18 
