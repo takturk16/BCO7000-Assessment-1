@@ -177,10 +177,12 @@ fastfood%>%
 
 ```
 
-##Part C Draft
+##Part C
 
+18. 
 ```{r}
-#Q18 
+
+skim(fastfood)
 
 fastfood<-fastfood%>%
   mutate(
@@ -188,13 +190,10 @@ fastfood<-fastfood%>%
     item=as_factor(item),
     salad=as_factor(salad))
 
-
 ```
 
-
+19.
 ```{r}
-
-#Q19  
 
 calories_type<-fastfood%>%
   mutate(
@@ -205,32 +204,28 @@ calories_type<-fastfood%>%
 
 ```
 
+20.
 ```{r}
 
-#Q20
 fastfood%>%
 ggplot(
-  aes(calories_type, restaurant)) +
-  geom_count() +
-  coord_polar() + 
-  theme_classic() +
-  facet_wrap(~ restaurant)
- 
+  aes(restaurant, calories, colour = restaurant, size=1.0)) +
+  geom_col() +
+  theme_update() +
+  facet_wrap(~ restaurant) +
+  coord_flip()
 
-fastfood%>% 
-  ggplot(aes(sugar, protein)) + 
-  geom_point()
 ```
 
+21.
 ```{r}
-#Q21
+
 trans_fat_percent<-fastfood%>%
 mutate(trans_fat_percent=trans_fat/total_fat*100)
 
 ```
 
 ```{r}
-#Q22
 
 fastfood%>%
 ggplot(aes(restaurant, trans_fat)) +
@@ -238,24 +233,24 @@ ggplot(aes(restaurant, trans_fat)) +
   theme_light() +
   facet_wrap(~ restaurant) +
   coord_flip()
+
 ```
-
+23.
 ```{r}
-
-#Q23
 
 fastfood%>%
   group_by(restaurant)%>%
   summarise(total_fat_mean=mean(total_fat, na.rm=TRUE))
+
 ```
 
+24.
 ```{r}
-#Q24
 
 fastfood%>%
 ggplot(aes(restaurant, total_fat, colour = restaurant)) +
   geom_col() +
   coord_polar() +
-  theme_classic() 
+  theme_classic()
 
 ```
