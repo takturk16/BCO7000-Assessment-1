@@ -210,8 +210,9 @@ calories_type<-fastfood%>%
 
 fastfood%>%
 ggplot(
-  aes(restaurant, calories, colour = restaurant, size=1.0)) +
+  aes(restaurant, calories, colour = restaurant, size=1.0,)) +
   geom_col() +
+  labs(x= "Fast Food Restaurants", y= "Calories", title= "Highlighting Calorie Differences...", subtitle = "Question 20") +
   theme_update() +
   facet_wrap(~ restaurant) +
   coord_flip()
@@ -250,6 +251,7 @@ fastfood%>%
 
 fastfood%>%
 ggplot(aes(restaurant, total_fat, colour = restaurant)) +
+   labs(x= "Restaurants", y= "Average Fat Total", title= "The Differences Between Fast Food Restaurants and Total Fat Content", subtitle = "Question 24") +
   geom_col() +
   coord_polar() +
   theme_classic()
