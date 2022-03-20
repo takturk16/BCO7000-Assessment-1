@@ -196,7 +196,12 @@ fastfood<-fastfood%>%
 
 #Q19  
 
-calories_type<-fastfood%>%mutate(calories_type=cut_number(calories, n=3), labels = c("low", "med", "high"))%>% arrange(desc(calories))
+calories_type<-fastfood%>%
+  mutate(
+    calories_type=cut_number(
+      calories, n=3, labels = c("low", "med", "high"))
+    )%>% 
+      arrange(desc(calories))
 
 ```
 
@@ -204,7 +209,8 @@ calories_type<-fastfood%>%mutate(calories_type=cut_number(calories, n=3), labels
 
 #Q20
 fastfood%>%
-ggplot(aes(restaurant, item)) +
+ggplot(
+  aes(calories_type, restaurant)) +
   geom_count() +
   coord_polar() + 
   theme_classic() +
