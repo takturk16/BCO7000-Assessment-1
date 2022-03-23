@@ -58,8 +58,7 @@ knitr::kable(head(thanksgiving[, 1:10]))
 
 ### 2. Using `skim()` display the summary of variables. 
 
-Think about the task to predict a family income based on their menu: what variables may be useful? Are all of them correct type? 
-Write 2-3 sentences with your explanation. (2 marks)
+### Think about the task to predict a family income based on their menu: what variables may be useful? Are all of them correct type? Write 2-3 sentences with your explanation. (2 marks)
 
 
 ```{r}
@@ -75,12 +74,16 @@ thanksgiving<-thanksgiving%>%
     main_prep=as_factor(main_prep),
     stuffing=as_factor(stuffing),
     cranberry=as_factor(cranberry),
-    gravy=as_factor(gravy))
+    gravy=as_factor(gravy),
+    age=as_factor(age),
+    gender=as_factor(gender),
+    us_region=as_factor(us_region),
+    celebrate=as_factor(celebrate))
 
 
 ```
 
-Think about the task to predict a community type or US_region based on their menu: what variables may be useful? Are all of them correct type? (2 marks)
+### Think about the task to predict a community type or US_region based on their menu: what variables may be useful? Are all of them correct type? (2 marks)
 
 ```{r}
 
@@ -93,15 +96,15 @@ Think about the task to predict a community type or US_region based on their men
 
 ```{r}
 
-thanksgiving%>%count(family_income, sort=TRUE)
+##NOT DONE
 
-thanksgiving%>%
+thanksgiving<-thanksgiving%>%
   mutate(
-    family_income=fct_reorder(family_income, us_region, sum, desc=TRUE)
-    )%>%ggplot(
-    aes(family_income, us_region)) +
-  geom_col() +
-  coord_flip()
+    family_income=fct_reorder(family_income, n=10, na=c("Prefer not to answer", "NA"))
+  )%>%
+  ggplot(aes(family_income)) + 
+  geom_count()
+
 
 ```
 
@@ -128,12 +131,119 @@ thanksgiving%>%
   count(main_prep)
 
 #We can see from the results from running a count check on main_dish is that 859 had Turkey as their main dish for Thanksgiving. Other main dishes that were recorded were; Tofurkey, Ham/Pork, Turducken, Roast Beef & Chicken. Additionally we can see that there were a combination of methods to prepare Thanksgiving these include; Baked & Roasted primarily contributing to 481 & 378 respectively. A small portion Fried their Thanksgiving main meals with a total of 47 people. 
-
-
-thanksgiving%>%
-  ggplot(aes(main_dish, main_prep)) +
-  geom_col() +
-  coord_flip()
   
 ```
+
+### 6. Create 3 different data viz showing insights for main dish served and the method. Provide your own legend and use themes.
+
+### Write 2-3 sentences with your explanation of each insight. (4 marks)
+
+```{r}
+
+##NOT DONE
+
+thanksgiving%>%
+  ggplot(aes(main_dish, colour = main_prep)) +
+  geom_bar() +
+  labs(x= "Thanksgiving Main Dish", y= "Number of People", title= "Most Popular Thanksgiving Meal", subtitle = "Question 6") +
+  theme_classic() +
+  coord_flip()
+ 
+#This data visualisation highlights to the viewers that clearly the most popular Thanksgiving meal is Turkey and this is split almost 50/50 by roasted or baked. You can see this as the x asis highlights the number of people and on the y axis the chosen main meals which colour is added to see the meal prep of those meals. 
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+### 7. How many use cranberry sauce? How many use gravy? 2marks
+
+```{r}
+thanksgiving%>%
+  count(cranberry)
+
+thanksgiving%>%
+  count(gravy)
+
+#803 people surveyed used cranberry sauce and 892 people surveyed used gravy.
+
+```
+
+### 8 - 9 What is the distribution of those who celebrate across income ranges. Create a data viz. Write 2-3 sentences with your explanation of each insight. (4 marks)
+
+```{r}
+
+##NOT DONE
+thanksgiving%>%
+  ggplot(
+    aes(celebrate, family_income)) +
+  geom_count() +
+  coord_flip()
+```
+
+### 10. Use the following code to create a new data set 2 mark
+
+`
+select(id, starts_with("side"),
+         starts_with("pie"),
+         starts_with("dessert")) %>%
+  select(-side15, -pie13, -dessert12) %>%
+  gather(type, value, -id) %>%
+  filter(!is.na(value),
+         !value %in% c("None", "Other (please specify)")) %>%
+  mutate(type = str_remove(type, "\\d+"))
+`
+
+Write 2-3 sentences with your explanation of what it does. (4 marks)
+
+```{r}
+
+#NOT DONE
+new_dataset<-thanksgiving%>%
+  select(id, starts_with("side"),
+         starts_with("pie"),
+         starts_with("dessert")) %>%
+  select(-side15, -pie13, -dessert12) %>%
+  gather(type, value, -id) %>%
+  filter(!is.na(value),
+         !value %in% c("None", "Other (please specify)")) %>%
+  mutate(type = str_remove(type, "\\d+"))
+
+#This new_dataset has 8145 observations of only 3 variables which is the survey ID, type and value. 
+
+```
+
+### 11 - 12 Intall package `widyr` and use `pairwise_cor()` function https://www.rdocumentation.org/packages/widyr/versions/0.1.3/topics/pairwise_cor 
+
+Write 2-3 sentences with your explanation of what it does. (2 marks)
+
+Use this code for the new dataset
+
+`
+pairwise_cor(value, id, sort = TRUE)
+
+`
+Write 1 sentence with your explanation of what insights it shows. (2 marks)
+
+```{r}
+#NOT DONE
+```
+
+### 13. Use `lm()` or randomForest() function to build a model that predict a family income based on data in the dataset. 8 marks
+
+Compare 3 models using different set of input variables. Use different number of variables.
+
+Explain your choice of variables (3 sentences) 
+
+Write 2 sentences explaining which model is best.
+
+```{r}
+
+```
+
 
