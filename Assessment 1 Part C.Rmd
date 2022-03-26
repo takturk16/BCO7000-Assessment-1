@@ -171,7 +171,8 @@ fastfood%>%
 17. 
 ```{r}
 
-fastfood%>% 
+fastfood%>%
+  filter(restaurant=="Mcdonalds")%>%
   ggplot(aes(sugar, protein)) + 
   geom_point()
 

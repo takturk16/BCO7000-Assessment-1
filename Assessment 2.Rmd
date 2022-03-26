@@ -96,14 +96,13 @@ thanksgiving<-thanksgiving%>%
 
 ```{r}
 
-##NOT DONE
+thanksgiving_1<-thanksgiving_1%>%
+  mutate(family_income=fct_reorder(family_income, parse_number(family_income)))
 
-thanksgiving<-thanksgiving%>%
-  mutate(
-    family_income=fct_reorder(family_income, n=10, na=c("Prefer not to answer", "NA"))
-  )%>%
-  ggplot(aes(family_income)) + 
-  geom_count()
+skim(thanksgiving_1)
+
+thanksgiving_1%>%
+  count(family_income)
 
 
 ```
@@ -179,11 +178,10 @@ thanksgiving%>%
 ```{r}
 
 ##NOT DONE
-thanksgiving%>%
+thanksgiving_1%>%
   ggplot(
     aes(celebrate, family_income)) +
-  geom_count() +
-  coord_flip()
+  geom_col()
 ```
 
 ### 10. Use the following code to create a new data set 2 mark
