@@ -64,9 +64,7 @@ knitr::kable(head(thanksgiving[, 1:10]))
 
 ```{r}
 
-skim(thanksgiving)
-
-#The menu and by extension the menu variables are in this case the inputs and predicting family income is the output of this model. There are a few variables which I believe may be useful to answering this question, these include; main_dish, main_prep, stuffing, cranberry & gravy. The reason why I suggest these are that these variables have very few data points missing compared to the others which have 800+ missing data points. The results would not be conclusive as the data is weak. They also are not in their correct form. They are listed as "characters" which could not give us correct information. I would need to use as_factor to use them correctly. 
+#There are a few variables which I believe may be useful to answering this question, these include; main_dish, main_prep, stuffing, cranberry & gravy. It would be interesting to see what people eat as the main and what they can afford. I also chose these variables as a starting point as they had the most completed. I have never heard of some of these meals but after some googling can see prices vary e.g. Ham/Pork more expensive than Turkey. They are all in character form and would require as_factor function to change it into a factor.
 
 
 ```
@@ -75,7 +73,11 @@ skim(thanksgiving)
 
 ```{r}
 
-#In this question we could model using the menu variables once again as my input, these can include; main_dish, main_prep, stuffing, cranberry & gravy. I would also include age & gender as my other input variables to see if there is any interesting insights. My output would be community_type and us_region. They are all once again not correct as they are listed as characters and will be needed to changed to factors for any data visualisation to occur. 
+thanksgiving%>%
+  count(community_type)
+
+#I can already assume rural vs urban would be different in what is eaten at Thanksgiving. People in more affluent suburbs and urban areas might have more opportunity to purchasing a variety of mains and could also afford it vs those in rural areas and may continue family traditions more and have less accesibility. Same applies to us_regions, I would assume there is differences in regions of the US which would naturally impact Thanksgiving e.g. urban cities with much more multiculturalism vs country US outback regions with mainly Anglo American's reside. 
+#I would include community_type, us_region, age, gender, family income and then also main_dish, main_prep as a start to begin exploring.They are all in character form and would require as_factor function to change it into a factor.
 
 ```
 
@@ -89,12 +91,11 @@ thanksgiving<-thanksgiving%>%
   mutate(family_income=fct_reorder(family_income, parse_number(family_income)))
 
 #After this running skim on the data you will see that family_income is now a factor and also highlights the top counts in the variable.
-skim(thanksgiving)
+#skim(thanksgiving)
 
 #Running a count on the variable also now shows you from $0 to $200,000 and onwards in order.
 thanksgiving%>%
   count(family_income)
-
 
 ```
 
@@ -204,7 +205,7 @@ thanksgiving<-thanksgiving%>%
   mutate(celebrate=as_factor(celebrate))
 
 #I skimmed the data to confirm this change
-skim(thanksgiving)
+#skim(thanksgiving)
 
 #I then filtered only those who celebrated Thanksgiving into my new dataset called celebrate.
 celebrate<-thanksgiving%>%
@@ -227,7 +228,7 @@ subtitle = "...") +
   geom_bar() + 
   coord_flip()
 
-#This data viz highlights that a large portion of those who celebrated Thanksgiving were on a family income of over $25,000 and below $125,000.
+#This data viz highlights that a large portion of those who celebrated Thanksgiving were on a family income of over $25,000 and below $125,000. It resembles are typical bell curve except after $200,000 it seems to spike and create and outlier. I would assume this is because the $200,000 and above is a huge bracket vs the main chunk which is limited into smaller brackets. There could be many people that earn more than $200,000 and could be the reason why a large portion of the people celebrate Thanksgiving, they can afford to. 
 ```
 
 ### 10. Use the following code to create a new data set 2 mark
@@ -274,7 +275,7 @@ library(widyr)
 new_dataset%>%
   pairwise_cor(value, id, sort = TRUE)
 
-#This shows the correlation between the two items and we can see that the first two rows have the highest explained variance between them as Cookies and Brownies. 
+#This shows the correlation between two items and we can see that the first two rows have the highest explained variance between them as Cookies and Brownies. It is comparing the pie, sides and deserts into a correlation to see what two variables have the highest explained variance. t doesn't mean Cookies and Brownies have any direct relationship per se but rather there is more variances explained with these two (0.4109...)
 ```
 
 
@@ -287,21 +288,57 @@ Explain your choice of variables (3 sentences)
 Write 2 sentences explaining which model is best.
 
 ```{r}
-#How to make numeric
-skim(thanksgiving)
 
-thanksgiving<-thanksgiving%>%
-  mutate(us_region=as_factor(us_region),
-         age=as_factor(age),
-         gender=as_factor(gender),
-         community_type=as_factor(community_type),
-         family_income=as_factor(family_income))
+#Model 1
 
-result_1<-lm(family_income~us_region, data = thanksgiving)
+#I chose work_retail to family_income because it is a known fact that the retail industry are on minimum awards and wages, in turn have less family income. So it would be interesting to see the results both with randomForest & lm. 
 
-summary(result_1)
-tidy(result_1)
+model_1<-randomForest(
+  family_income~ work_retail,
+  data = thanksgiving, 
+  na.action=na.omit)
 
+print(model_1)
+#Difficult to interpret and whether I have done this correctly however it states a estimate error rate of 82.47%. 
+
+model_1a<-lm(family_income~work_retail, data = thanksgiving)
+
+print(model_1a)
+#Negative coeffecient suggesting it may have a negative relationship.
+
+#Model 2
+
+model_2<-randomForest(
+  family_income~main_dish+main_prep, 
+  data = thanksgiving,
+  na.action=na.omit)
+
+print(model_2)
+#The randomForest classifcation model results in an estimate error rate of 81.41%. 
+
+model_2a<-lm(family_income~main_dish+main_prep, data = thanksgiving)
+
+print(model_2a)
+#This time comparing two inputs to family income I can see the coefficients are all negative except main_prep other with 0.226 and main_prep I don't know with 0.489. 
+
+#Model 3
+
+model_3<-randomForest(
+  family_income~community_type,
+  data = thanksgiving,
+  na.action=na.omit)
+
+print(model_3)
+#Again an error rate of 82.47% between family income and community type.
+
+model_3a<-lm(family_income~community_type, data = thanksgiving)
+
+print(model_3a)
+#The types of commmunity are negative coffecicent suggesting there isn't a positive relationship but rather a negative. Very difficult to interpret what this means or whether I have coded it correctly.
+
+#I chose family income as the output and compared it to various variables. Model 1 was about more so retail workers vs family income. Model 2 comparing main dish and preparation to family income and lastly community type to income. 
+#My reasons are clearly there is some insights with main dishes and how it differs with the income so I wanted to see it in the randomForest model. I wasn't sure if it was correct so I ran lm as well. 
+#With this data and results I think model2 has the advantage with less error but I am still not convinced. 
 ```
 
 
