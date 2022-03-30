@@ -13,6 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(randomForest)
+library(skimr)
+library(broom)
+library(broom.mixed)
+library(widyr)
 
 ```
 
@@ -290,55 +294,49 @@ Write 2 sentences explaining which model is best.
 ```{r}
 
 #Model 1
+#1 Convert to number
 
-#I chose work_retail to family_income because it is a known fact that the retail industry are on minimum awards and wages, in turn have less family income. So it would be interesting to see the results both with randomForest & lm. 
+thanksgiving_1<-thanksgiving%>%
+  mutate(
+    family_income_number=parse_number(family_income),
+    age_number=parse_number(age)
+  )
 
-model_1<-randomForest(
-  family_income~ work_retail,
-  data = thanksgiving, 
-  na.action=na.omit)
+#2 filter NA's
+thanksgiving_1<-thanksgiving_1%>%
+  filter(!is.na(family_income_number) & !is.na(age_number))
 
-print(model_1)
-#Difficult to interpret and whether I have done this correctly however it states a estimate error rate of 82.47%. 
-
-model_1a<-lm(family_income~work_retail, data = thanksgiving)
+#Model_1a code  
+model_1a<-lm(family_income_number~age_number, data = thanksgiving_1)
 
 print(model_1a)
-#Negative coeffecient suggesting it may have a negative relationship.
+
+summary(model_1a)
+
+#I used in my first model comparing family income with age. My understanding is that family income should increase with age as people become more skilled and experienced so their income should reflect that too. After running a linear regression model, the results gave a Adjusted R Squared 0.07148 which a very good indication of explained variance between the two variables.
 
 #Model 2
 
-model_2<-randomForest(
-  family_income~main_dish+main_prep, 
-  data = thanksgiving,
-  na.action=na.omit)
+thanksgiving_2<-thanksgiving%>%
+  mutate(
+    family_income_number=parse_number(family_income),
+    main_dish_number=parse_number(main_dish),
+    main_prep_number=parse_number(main_prep)
+  )
 
-print(model_2)
-#The randomForest classifcation model results in an estimate error rate of 81.41%. 
+thanksgiving_2<-thanksgiving_2%>%
+  filter(!is.na(main_dish_number) & !is.na(main_prep_number))
 
-model_2a<-lm(family_income~main_dish+main_prep, data = thanksgiving)
+model_2a<-lm(family_income_number~main_dish_number+main_prep_number, data = thanksgiving_2)
 
-print(model_2a)
-#This time comparing two inputs to family income I can see the coefficients are all negative except main_prep other with 0.226 and main_prep I don't know with 0.489. 
+#In the end could not generate this model. I wanted to do the same process as model 1 whereby I parse_number the variables so I can simply run them in a linear regression model to see the explained variance between the two variables. I wanted to see how family income impacted the type of main dish and main prep. I believe there would have been due to financial implications, those on higher incomes could afford the most expensive meals and prepared fresh vs those in lower income brackets who may only be able to afford the simplest of meals canned. This ofcourse is an assumption and would have loved to use the data to find this. 
 
 #Model 3
 
-model_3<-randomForest(
-  family_income~community_type,
-  data = thanksgiving,
-  na.action=na.omit)
+thanksgiving_rf1<-randomForest(family_income~age+community_type,
+  data = thanksgiving)
 
-print(model_3)
-#Again an error rate of 82.47% between family income and community type.
-
-model_3a<-lm(family_income~community_type, data = thanksgiving)
-
-print(model_3a)
-#The types of commmunity are negative coffecicent suggesting there isn't a positive relationship but rather a negative. Very difficult to interpret what this means or whether I have coded it correctly.
-
-#I chose family income as the output and compared it to various variables. Model 1 was about more so retail workers vs family income. Model 2 comparing main dish and preparation to family income and lastly community type to income. 
-#My reasons are clearly there is some insights with main dishes and how it differs with the income so I wanted to see it in the randomForest model. I wasn't sure if it was correct so I ran lm as well. 
-#With this data and results I think model2 has the advantage with less error but I am still not convinced. 
+#This code again didn't seem to work. We done this in class and seem to not run on mine. I wanted to us randomForest classification whereby I use regardless of character or factor two input variables in this case age and community type against the output family income. I believe there would've have been something interesting in the results.
 ```
 
 
