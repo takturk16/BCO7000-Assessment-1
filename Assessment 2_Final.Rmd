@@ -1,0 +1,349 @@
+---
+title: "Assessment 2_Final"
+author: "Tolga Akturk"
+date: '2022-04-09'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(randomForest)
+library(skimr)
+library(broom)
+library(broom.mixed)
+library(widyr)
+
+```
+
+
+```{r}
+
+thanksgiving<-read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-11-20/thanksgiving_meals.csv")
+
+```
+
+### Part 1: formatting RMarkdown document  (2 marks)
+
+### 1. Create an Rmarkdown document with webpage as output (same as in setup)
+
+At the start of the output document include your name in italic font and 
+your student id in bold font as level 2 heading 
+
+Separate with a solid line 
+
+Include the title “Assignment 2” as level 1 heading 
+
+Separate with a solid line 
+
+List all tasks in the assignment as headings of the third level and include your results (=output) below each task showing your R code. 
+
+## *Tolga Akturk* **s3876862**
+
+---
+
+# Assignment 2
+
+---
+
+### Part 2: Data Wrangling and visualization (38 marks)
+
+### 1. Display the first 10 rows of the dataset using `kable()` function (1 marks)
+
+```{r}
+
+#This code below uses kable function to highlight the first ten rows of the dataset as why I have listed 1:10. 
+
+knitr::kable(head(thanksgiving[, 1:10]))
+
+```
+
+### 2. Using `skim()` display the summary of variables. 
+
+### Think about the task to predict a family income based on their menu: what variables may be useful? Are all of them correct type? Write 2-3 sentences with your explanation. (2 marks)
+
+
+```{r}
+
+#There are a few variables which I believe may be useful to answering this question, these include; main_dish, main_prep, stuffing, cranberry & gravy. It would be interesting to see what people eat as the main and what they can afford. I also chose these variables as a starting point as they had the most completed. I have never heard of some of these meals but after some googling can see prices vary e.g. Ham/Pork more expensive than Turkey. They are all in character form and would require as_factor function to change it into a factor.
+
+skim(thanksgiving)
+
+```
+
+### Think about the task to predict a community type or US_region based on their menu: what variables may be useful? Are all of them correct type? (2 marks)
+
+```{r}
+
+#I can already assume rural vs urban would be different in what is eaten at Thanksgiving. People in more affluent suburbs and urban areas might have more opportunity to purchasing a variety of mains and could also afford it vs those in rural areas and may continue family traditions more and have less accessibility. Same applies to us_regions, I would assume there is differences in regions of the US which would naturally impact Thanksgiving e.g. urban cities with much more multiculturalism vs country US outback regions with mainly Anglo American's reside. 
+#I would include community_type, us_region, age, gender, family income and then also main_dish, main_prep as a start to begin exploring.They are all in character form and would require as_factor function to change it into a factor.
+
+thanksgiving%>%
+  count(community_type)
+
+```
+
+### 3. Use `fct_reorder` and `parse_number` functions to create a factor variable `family_income` (2 mark)
+
+
+```{r}
+
+#Firstly I will run this code to re-order the variable family_income and also changes this variable into a factor.
+
+thanksgiving_fct<-thanksgiving%>%
+  mutate(family_income=fct_reorder(family_income, parse_number(family_income)))
+
+#After this running skim on the data you will see that family_income is now a factor and also highlights the top counts in the variable.
+#skim(thanksgiving)
+
+#Running a count on the variable also now shows you from $0 to $200,000 and onwards in order.
+
+thanksgiving_fct%>%
+  count(family_income)
+
+```
+
+### 4. What is the number of people who celebrate? (1 mark)
+
+```{r}
+
+#According to the data 980 people celebrated Thanksgiving from the total of 1,058 surveys completed. That is approximately 93% of the participants.You can view this by running a quick count on the variable count.
+
+thanksgiving%>%
+count(celebrate)
+
+```
+
+### 5. What are categories and insights for each main dish served and the method it is prepared? (2 marks)
+
+```{r}
+
+#The categories are below; Chicken, Ham/Pork, Roast Beef, Tofurkey, Turkey, Turducken, I don't know, other and NA.
+
+thanksgiving%>%
+  count(main_dish)
+
+
+#Running a count check on main_dish we can clearly see that Turkey is the most popular main dish of Thanksgiving from this dataset. You could also comment that approximately 81% of those surveyed eat Turkey as their main dish at Thanksgiving by calculating this by 859 that chose Turkey / 1,058 total surveyed.
+
+thanksgiving%>%
+  count(main_prep)
+
+#The categories are below; Baked, Fried, Roasted, I don't know, other and NA.
+
+#The data highlights that there were a combination of methods to prepare Thanksgiving main dishes however Baked & Roasted primarily contributed to 481 & 378 respectively or 45% & 36% with total of 81% of the main dishes. 
+  
+```
+
+### 6. Create 3 different data viz showing insights for main dish served and the method. Provide your own legend and use themes.
+
+### Write 2-3 sentences with your explanation of each insight. (4 marks)
+
+```{r}
+
+#Turkey is a Thanksgiving favourite. This data visualisation highlights to the viewers that clearly the most popular Thanksgiving meal is Turkey and this is split almost 50/50 by roasted or baked. You can see this as the x asis highlights the number of people and on the y axis the chosen main meals which colour is added to see the meal prep of those meals. The colour is added to easily see the main dishes individually in this visualisation. I have also used the filter function at the beginning to remove NA resposes and have a more clearer view of the data viz.
+
+thanksgiving%>%
+  filter(!is.na(main_dish))%>%
+  ggplot(aes(main_dish, main_prep, colour = main_dish)) +
+  geom_jitter() +
+  labs(x = "Main Dish Types", y = "Preparation Type", title ="Viewing Thanksgiving Main Dish and Preparation Types",
+subtitle = "Clearly Turkey is our main either Roasted or Baked...",
+caption = "81% is Turkey & either Baked or Roasted...") +
+  theme_classic() +
+  coord_flip()
+ 
+```
+
+```{r}
+
+thanksgiving%>%
+  count(us_region)
+
+#After running a count (above) on us_region we can see that the surveyed Thanksgiving respondents are from; South Atlantic 214 people, Middle Atlantic 159 people, East North Central 150 people & Pacific with 146 people as for the most part. The combination of these US regions equates to over 63% of the surveyed respondents. 
+
+#You can then see this in the visualisation below where the main Thanksgiving dish is served highlighted by the us_region. Turkey as we know is the favourite coming from Middle Atlantic, South Atlantic, Pacific and East North Central. 
+
+thanksgiving%>%
+  filter(!is.na(main_dish))%>%
+  ggplot(aes(main_dish, us_region, colour = us_region)) +
+  labs(x = "Main Dish Types", y = "US Region", title ="Viewing Thanksgiving Main Dish by US Regions",
+subtitle = "South Atlantic, Middle Atlantic, East North Central & Pacific have the most Turkey...") +
+  theme_classic() +
+  geom_jitter()
+
+```
+
+```{r}
+
+thanksgiving%>%
+  count(gender)
+
+#I ran a count on gender and according to the data there was 481 males and 544 females with a 45% and 51% respectively. The below data visualisation has on the x asis main dish preparation types and the y axis the gender. We cannot see any major differences from the above numbers when exploring main dish preparation types. 
+
+thanksgiving%>%
+  filter(!is.na(gender))%>%
+  ggplot(aes(main_prep, gender, colour = gender)) +
+  labs(x = "Main Dish Preparation Types", y = "Gender", title ="Viewing Thanksgiving Main Dish Prep by Gender",
+subtitle = "Almost a 50/50 split with Male & Female....") +
+  theme_classic() +
+  geom_jitter()
+
+```
+
+### 7. How many use cranberry sauce? How many use gravy? 2marks
+
+```{r}
+
+#803 people surveyed used cranberry sauce and 892 people surveyed used gravy.
+
+thanksgiving%>%
+  count(cranberry)
+
+thanksgiving%>%
+  count(gravy)
+
+```
+
+### 8 - 9 What is the distribution of those who celebrate across income ranges. Create a data viz. Write 2-3 sentences with your explanation of each insight. (4 marks)
+
+```{r}
+
+#First I had to change celebrate from a character into a factor in order to use it in any data visualisation 
+
+thanksgiving_factor<-thanksgiving%>%
+  mutate(celebrate=as_factor(celebrate))
+
+#I skimmed the data to confirm this change
+
+skim(thanksgiving_factor)
+
+#I then filtered only those who celebrated Thanksgiving into my new dataset called celebrate.
+
+celebrate<-thanksgiving_factor%>%
+  filter(celebrate=="Yes")
+
+#I wanted to see a quick count of how many in each range. I realised that it was not ordered.
+
+celebrate%>%
+  count(family_income)
+
+#I used fct_reorder and parse_number to organise the income ranges neatly.
+
+celebrate_fct<-celebrate%>%
+  mutate(family_income=fct_reorder(family_income, parse_number(family_income)))
+
+#This code below will highlight the distribution of family income of those who celebrated Thanksgiving.
+
+#This data viz highlights that a large portion of those who celebrated Thanksgiving were on a family income of over $25,000 and below $125,000. It resembles are typical bell curve except after $200,000 it seems to spike and create and outlier. I would assume this is because the $200,000 and above is a huge bracket vs the main chunk which is limited into smaller brackets. There could be many people that earn more than $200,000 and could be the reason why a large portion of the people celebrate Thanksgiving, they can afford to. 
+
+celebrate_fct%>%
+  filter(!is.na(family_income))%>%
+  ggplot(aes(family_income, colour = family_income)) +
+  labs(x = "Family Income Ranges", y = "How Many People", title ="Distribution on Family Income across those who celebrated Thanksgiving",
+subtitle = "...") +
+  geom_bar() + 
+  coord_flip()
+
+```
+
+### 10. Use the following code to create a new data set 2 mark
+### Write 2-3 sentences with your explanation of what it does. (4 marks)
+
+```{r}
+
+#I believe what has happened here is firstly select. The new dataset called new_dataset will select from our original dataset called thanksgiving only these observations that match the pattern; side, pie & desert.
+#It then pipes the dataset and runs select again but this time removing these three variables side15, pie13 & desert12.
+#It then pipes again and gathers columns into key-value pairs; type, value and id.
+#Then it pipes this and uses filter to remove from value any "None" and "Other" observations
+
+#Overall what has happened here is that the original dataset was too difficult to use any side, pie or desert observations due to too many invalid observations. They either had nothing completed or had "None" or had "Other" which was too difficult to view. Now the new dataset can be used to compare within the three variables side, pie & desert without any errors.
+
+new_dataset<-thanksgiving%>%
+select(id, starts_with("side"),
+         starts_with("pie"),
+         starts_with("dessert")) %>%
+  select(-side15, -pie13, -dessert12) %>%
+  gather(type, value, -id) %>%
+  filter(!is.na(value),
+         !value %in% c("None", "Other (please specify)")) %>%
+  mutate(type = str_remove(type, "\\d+"))
+
+```
+
+### 11 - 12 Intall package `widyr` and use `pairwise_cor()` function https://www.rdocumentation.org/packages/widyr/versions/0.1.3/topics/pairwise_cor 
+
+### Write 2-3 sentences with your explanation of what it does. (2 marks)
+
+Use this code for the new dataset
+
+`
+pairwise_cor(value, id, sort = TRUE)
+
+`
+Write 1 sentence with your explanation of what insights it shows. (2 marks)
+
+```{r}
+
+#This shows the correlation between two items and we can see that the first two rows have the highest explained variance between them as Cookies and Brownies. It is comparing the pie, sides and deserts into a correlation to see what two variables have the highest explained variance. t doesn't mean Cookies and Brownies have any direct relationship per se but rather there is more variances explained with these two (0.4109...)
+
+new_dataset%>%
+  pairwise_cor(value, id, sort = TRUE)
+
+```
+
+### 13. Use `lm()` or randomForest() function to build a model that predict a family income based on data in the dataset. 8 marks
+
+Compare 3 models using different set of input variables. Use different number of variables.
+
+Explain your choice of variables (3 sentences) 
+
+Write 2 sentences explaining which model is best.
+
+```{r}
+
+#Model 1
+#1 Convert to number
+
+thanksgiving_1<-thanksgiving%>%
+  mutate(
+    family_income_number=parse_number(family_income),
+    age_number=parse_number(age)
+  )
+
+#2 filter NA's
+
+thanksgiving_1<-thanksgiving_1%>%
+  filter(!is.na(family_income_number) & !is.na(age_number))
+
+#Model_1a code  
+
+model_1a<-lm(family_income_number~age_number, data = thanksgiving_1)
+
+print(model_1a)
+
+summary(model_1a)
+
+#I used in my first model comparing family income with age. My understanding is that family income should increase with age as people become more skilled and experienced so their income should reflect that too. After running a linear regression model, the results gave a Adjusted R Squared 0.07148 which a very good indication of explained variance between the two variables.
+
+#Model 2
+
+thanksgiving_2<-thanksgiving%>%
+  mutate(
+    family_income_number=parse_number(family_income),
+    main_dish_number=parse_number(main_dish),
+    main_prep_number=parse_number(main_prep)
+  )
+
+thanksgiving_2<-thanksgiving_2%>%
+  filter(!is.na(main_dish_number) & !is.na(main_prep_number))
+
+#ERROR model_2a<-lm(family_income_number~main_dish_number+main_prep_number, data = thanksgiving_2)
+
+#In the end could not generate this model. I wanted to do the same process as model 1 whereby I parse_number the variables so I can simply run them in a linear regression model to see the explained variance between the two variables. I wanted to see how family income impacted the type of main dish and main prep. I believe there would have been due to financial implications, those on higher incomes could afford the most expensive meals and prepared fresh vs those in lower income brackets who may only be able to afford the simplest of meals canned. This ofcourse is an assumption and would have loved to use the data to find this. 
+
+#Model 3
+
+#This code again didn't seem to work. We done this in class and seem to not run on mine. I wanted to us randomForest classification whereby I use regardless of character or factor two input variables in this case age and community type against the output family income. I believe there would've have been something interesting in the results.
+```
